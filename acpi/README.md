@@ -7,6 +7,8 @@ Initial ACPI table sources for Windows on ARM bring-up on SM8750 / Snapdragon 8 
 - `sm8750-madt.asl` — MADT/APIC data-table ASL/DSL source with GICC entries for 8 CPUs plus GICD/GICR.
 - `sm8750-gtdt.asl` — GTDT data-table ASL/DSL source with ARM arch timer GSIVs.
 - `sm8750-madt.dat`, `sm8750-gtdt.dat` — binary tables generated from the same values, with checksums filled.
+- `sm8750-simple-framebuffer.asl` — `Device (FB00)` snippet for a 1440x3168 simple-framebuffer using the DTS continuous splash memory.
+- `simple-framebuffer-notes.md` — framebuffer address, stride and source notes.
 
 ## Extracted values
 
