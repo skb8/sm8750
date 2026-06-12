@@ -51,10 +51,10 @@
   UefiLib|MdePkg/Library/UefiLib/UefiLib.inf
   UefiRuntimeServicesTableLib|MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
 
-  # ARM/AARCH64 support. CompilerIntrinsicsLib is linked as a NULL library so
-  # GCC/Clang generated helper calls for AARCH64 resolve during final link.
-  ArmLib|ArmPkg/Library/ArmLib/ArmBaseLib.inf
-  NULL|ArmPkg/Library/CompilerIntrinsicsLib/CompilerIntrinsicsLib.inf
+  # ARM/AARCH64 support for current tianocore/edk2 master.
+  # ArmBaseLib and CompilerIntrinsicsLib were moved from ArmPkg to MdePkg.
+  ArmLib|MdePkg/Library/ArmLib/ArmBaseLib.inf
+  NULL|MdePkg/Library/CompilerIntrinsicsLib/CompilerIntrinsicsLib.inf
 
 [Components.AARCH64]
   $(SM8750_XENONBOOT_PATH)/XenonBoot/XenonBoot.inf
