@@ -9,6 +9,10 @@ Initial ACPI table sources for Windows on ARM bring-up on SM8750 / Snapdragon 8 
 - `sm8750-madt.dat`, `sm8750-gtdt.dat` — binary tables generated from the same values, with checksums filled.
 - `sm8750-simple-framebuffer.asl` — `Device (FB00)` snippet for a 1440x3168 simple-framebuffer using the DTS continuous splash memory.
 - `simple-framebuffer-notes.md` — framebuffer address, stride and source notes.
+- `sm8750-oneplus13-buttons.asl` — OnePlus 13 / OPlus dodge button ASL skeleton for power, volume-up and volume-down.
+- `sm8750-oneplus13-usb.asl` — USB3 / DWC3 xHCI ASL skeleton from `sun-usb.dtsi`.
+- `sm8750-oneplus13-touchscreen.asl` — Synaptics S3910 touchscreen over QUPv3 SE4 SPI ASL skeleton.
+- `oneplus13-peripherals-notes.md` — extracted DTS resources and caveats for buttons, USB and touchscreen.
 
 ## Extracted values
 
