@@ -11,8 +11,11 @@ Initial ACPI table sources for Windows on ARM bring-up on SM8750 / Snapdragon 8 
 - `simple-framebuffer-notes.md` — framebuffer address, stride and source notes.
 - `sm8750-oneplus13-buttons.asl` — OnePlus 13 / OPlus dodge button ASL skeleton for power, volume-up and volume-down.
 - `sm8750-oneplus13-usb.asl` — USB3 / DWC3 xHCI ASL skeleton from `sun-usb.dtsi`.
-- `sm8750-oneplus13-touchscreen.asl` — Synaptics S3910 touchscreen over QUPv3 SE4 SPI ASL skeleton.
-- `oneplus13-peripherals-notes.md` — extracted DTS resources and caveats for buttons, USB and touchscreen.
+- `sm8750-oneplus13-touchscreen.asl` — DTBO-confirmed Synaptics S3910 touchscreen over QUPv3 SE4 SPI ASL skeleton.
+- `sm8750-oneplus13-thermal.asl` — PMIC temp-alarm / BCL thermal sensor ACPI skeleton from the official DTBO.
+- `sm8750-oneplus13-battery.asl` — OPlus MMS gauge/charger plus placeholder ACPI Control Method Battery skeleton.
+- `sm8750-oneplus13-display-cover.asl` — display backlight GPIO plus magnetic cover/Hall controller skeleton.
+- `oneplus13-peripherals-notes.md` — extracted DTBO/DTS resources and caveats for buttons, USB, touchscreen, thermal, battery and display/cover peripherals.
 
 ## Extracted values
 
@@ -29,6 +32,12 @@ Initial ACPI table sources for Windows on ARM bring-up on SM8750 / Snapdragon 8 
 | Counter frequency | `19200000` | Documented here; ACPI consumers usually read CNTFRQ_EL0 |
 
 DT interrupt translation rule used: ARM GIC PPI `N` becomes ACPI GSIV `16 + N`.
+
+## OnePlus 13 DTBO confirmation
+
+The repository `dtbo.img` was decoded as an Android DTBO image with six overlays. The active model is `Qualcomm Technologies, Inc. Sun MTP,dodge T0`; project IDs are `0x5d0d` (`23821`) and variants `0x5d55`, `0x5d56`, `0x5d57`. Peripheral ASL files under `sm8750-oneplus13-*` are therefore aligned to the OPlus `dodge` branch.
+
+All OnePlus 13 ASL snippets have been syntax-validated by wrapping each file in an SSDT `DefinitionBlock` and compiling with `iasl -tc`; current result is `0 Errors, 0 Warnings, 0 Remarks` for buttons, USB, touchscreen, thermal, battery and display/cover snippets.
 
 ## Source paths
 
