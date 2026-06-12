@@ -2,7 +2,8 @@
 # XenonBoot EDK2 UEFI application for SM8750 / Snapdragon 8 Elite Windows chainload.
 #
 # Build inside an EDK2 workspace for AARCH64 using the repo-level DSC:
-#   build -a AARCH64 -t GCC5 -p Sm8750Platform.dsc
+#   build -a AARCH64 -t GCC -p Sm8750Platform.dsc
+# Current tianocore/edk2 master removed GCC5 from tools_def.txt.
 ##
 
 [Defines]

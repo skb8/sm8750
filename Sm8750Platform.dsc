@@ -3,7 +3,10 @@
 #
 # Intended command when this repo is used as the EDK2 workspace root or is made
 # visible through PACKAGES_PATH:
-#   build -a AARCH64 -t GCC5 -p Sm8750Platform.dsc
+#   build -a AARCH64 -t GCC -p Sm8750Platform.dsc
+#
+# Current tianocore/edk2 master removed GCC5 from tools_def.txt; use GCC with
+# GCC_AARCH64_PREFIX pointing at an aarch64-linux-gnu cross toolchain.
 #
 # If the repo is checked out inside a larger EDK2 workspace as "sm8750", the
 # same component path is: sm8750/edk2/XenonBoot/XenonBoot.inf. In that layout,
@@ -42,6 +45,7 @@
   DevicePathLib|MdePkg/Library/UefiDevicePathLibDevicePathProtocol/UefiDevicePathLibDevicePathProtocol.inf
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
+  StackCheckLib|MdePkg/Library/StackCheckLibNull/StackCheckLibNull.inf
   PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
   ReportStatusCodeLib|MdePkg/Library/BaseReportStatusCodeLibNull/BaseReportStatusCodeLibNull.inf
   SynchronizationLib|MdePkg/Library/BaseSynchronizationLib/BaseSynchronizationLib.inf
