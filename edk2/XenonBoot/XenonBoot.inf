@@ -1,8 +1,8 @@
 ## @file
 # XenonBoot EDK2 UEFI application for SM8750 / Snapdragon 8 Elite Windows chainload.
 #
-# Build inside an EDK2 workspace for AARCH64, for example:
-#   build -a AARCH64 -t GCC5 -p YourPlatformPkg/YourPlatformPkg.dsc -m sm8750/edk2/XenonBoot/XenonBoot.inf
+# Build inside an EDK2 workspace for AARCH64 using the repo-level DSC:
+#   build -a AARCH64 -t GCC5 -p Sm8750Platform.dsc
 ##
 
 [Defines]
