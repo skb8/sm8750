@@ -1,0 +1,32 @@
+## @file
+# XenonBoot EDK2 UEFI application for SM8750 / Snapdragon 8 Elite Windows chainload.
+#
+# Build inside an EDK2 workspace for AARCH64, for example:
+#   build -a AARCH64 -t GCC5 -p YourPlatformPkg/YourPlatformPkg.dsc -m sm8750/edk2/XenonBoot/XenonBoot.inf
+##
+
+[Defines]
+  INF_VERSION                    = 0x0001001B
+  BASE_NAME                      = XenonBoot
+  FILE_GUID                      = 9F6E7D4B-7E6F-4C73-9D5F-8750A11B0001
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = XenonBootEntryPoint
+
+[Sources]
+  XenonBoot.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  DevicePathLib
+  MemoryAllocationLib
+  UefiApplicationEntryPoint
+  UefiBootServicesTableLib
+  UefiLib
+
+[Protocols]
+  gEfiAcpiTableProtocolGuid
+  gEfiSimpleFileSystemProtocolGuid
