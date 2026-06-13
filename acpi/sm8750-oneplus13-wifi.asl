@@ -64,7 +64,7 @@ Device (PCI0)
             Memory32Fixed (ReadWrite, 0x40100000, 0x00100000)
 
             // PCIe IO window. Use DWordIO because the translated MMIO
-            // aperture is above the 16-bit range accepted by WordIO.
+            // aperture is above the 16-bit limit of a 16-bit IO descriptor.
             DWordIO (ResourceProducer, MinFixed, MaxFixed, PosDecode, EntireRange,
                      0x00000000, 0x40200000, 0x402FFFFF, 0x00000000,
                      0x00100000)
