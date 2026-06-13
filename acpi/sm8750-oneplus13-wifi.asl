@@ -34,9 +34,8 @@
  *   perst   TLMM 102  PCIe PERST# (active-low reset to WCN7850)
  *   wake    TLMM 104  PCIe WAKE# (device wakeup, input)
  *
- * TODO: wlan-en GPIO is in vendor/oplus overlay, not base sun-pcie.dtsi.
- *   Confirm GPIO number on-device before enabling. Likely TLMM 163
- *   based on SM8750 reference platform; placeholder 0xFFFF set here.
+ * OPlus commercial OnePlus 13 / dodge T0 overlay confirmation:
+ *   wlan-en  TLMM 16 (0x10)  WCN7850 enable GPIO.
  *
  * Windows driver hardware IDs (from Qualcomm Windows Update packages):
  *   PCI\VEN_17CB&DEV_1107  WCN7850 Wi-Fi
@@ -64,9 +63,11 @@ Device (PCI0)
             // PCIe ECAM config space (buses 0-3, 1MB)
             Memory32Fixed (ReadWrite, 0x40100000, 0x00100000)
 
-            // PCIe IO window
-            WordIO (ResourceProducer, MinFixed, MaxFixed, PosDecode, EntireRange,
-                    0x0000, 0x40200000, 0x402FFFFF, 0x00000000, 0x00100000)
+            // PCIe IO window. Use DWordIO because the translated MMIO
+            // aperture is above the 16-bit range accepted by WordIO.
+            DWordIO (ResourceProducer, MinFixed, MaxFixed, PosDecode, EntireRange,
+                     0x00000000, 0x40200000, 0x402FFFFF, 0x00000000,
+                     0x00100000)
 
             // PCIe MEM32 window (WCN7850 BARs land here)
             DWordMemory (ResourceProducer, PosDecode, MinFixed, MaxFixed,
@@ -100,10 +101,8 @@ Device (PCI0)
             Package () { "compatible",         "qcom,pcie-sm8750,qcom,pci-msm" },
             Package () { "qcom,pcie-phy-ver",  94 },
             Package () { "linux,pci-domain",   0 },
-            // wlan-en GPIO: TODO confirm from OPlus vendor overlay
-            // (DTBO fragment@124/__overlay__/qcom,cnss-peach@b0000000:wlan-en-gpio)
-            // Placeholder 0xFFFF; do NOT enable without confirming on-device.
-            Package () { "wlan-en-gpio",       0xFFFF },
+            // wlan-en GPIO: confirmed for commercial OnePlus 13 / dodge T0.
+            Package () { "wlan-en-gpio",       0x10 },
         }
     })
 

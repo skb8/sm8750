@@ -10,12 +10,15 @@ Initial ACPI table sources for Windows on ARM bring-up on SM8750 / Snapdragon 8 
 - `sm8750-simple-framebuffer.asl` — `Device (FB00)` snippet for a 1440x3168 simple-framebuffer using the DTS continuous splash memory.
 - `simple-framebuffer-notes.md` — framebuffer address, stride and source notes.
 - `sm8750-oneplus13-buttons.asl` — OnePlus 13 / OPlus dodge button ASL skeleton for power, volume-up and volume-down.
-- `sm8750-oneplus13-usb.asl` — USB3 / DWC3 xHCI ASL skeleton from `sun-usb.dtsi`.
-- `sm8750-oneplus13-touchscreen.asl` — DTBO-confirmed Synaptics S3910 touchscreen over QUPv3 SE4 SPI ASL skeleton.
+- `sm8750-oneplus13-usb.asl` — USB3 / DWC3 xHCI ASL skeleton from `sun-usb.dtsi`, now including eUSB2 HS PHY, USB3/DP QMP PHY and a Type-C role-switch `ACPI0040` connector.
+- `sm8750-oneplus13-touchscreen.asl` — fully checked commercial OnePlus 13 Synaptics S3910 touchscreen over QUPv3 SE4 SPI. It matches the real DT path `/soc/qupv3_1_geni_se@ac0000/spi@a90000`, IRQ GPIO `162`, Reset GPIO `161`, AVDD PM8550VS-J GPIO `3`, `_HID` `SYNA3910`.
 - `sm8750-oneplus13-thermal.asl` — PMIC temp-alarm / BCL thermal sensor ACPI skeleton from the official DTBO.
 - `sm8750-oneplus13-battery.asl` — OPlus MMS gauge/charger plus placeholder ACPI Control Method Battery skeleton.
 - `sm8750-oneplus13-display-cover.asl` — display backlight GPIO plus magnetic cover/Hall controller skeleton.
-- `oneplus13-peripherals-notes.md` — extracted DTBO/DTS resources and caveats for buttons, USB, touchscreen, thermal, battery and display/cover peripherals.
+- `sm8750-oneplus13-mdss-display.asl` — MDSS/DSI0/DSI1/DP display controller resource skeleton for the OnePlus 13 panel path; simple framebuffer remains the current fallback display path until a Qualcomm MDSS Windows driver binds.
+- `sm8750-oneplus13-wifi.asl` — fully checked commercial OnePlus 13 WCN7850 Wi-Fi/BT PCIe Root Complex skeleton with PCIe0 resources, PERST GPIO `102`, WAKE GPIO `104`, and confirmed WLAN enable GPIO `16` (`0x10`).
+- `../drivers/touchscreen/SynapticsTouch_S3910.inf`, `../drivers/touchscreen/spb_spi.c`, `../drivers/touchscreen/spb_spi.h` — Windows touchscreen driver adaptation files for `ACPI\SYNA3910` and Synaptics S3910 SPI-HBP transport.
+- `oneplus13-peripherals-notes.md` — extracted DTBO/DTS resources and caveats for buttons, USB, touchscreen, thermal, battery, display/cover, MDSS and Wi-Fi peripherals.
 
 ## Extracted values
 
@@ -37,7 +40,12 @@ DT interrupt translation rule used: ARM GIC PPI `N` becomes ACPI GSIV `16 + N`.
 
 The repository `dtbo.img` was decoded as an Android DTBO image with six overlays. The active model is `Qualcomm Technologies, Inc. Sun MTP,dodge T0`; project IDs are `0x5d0d` (`23821`) and variants `0x5d55`, `0x5d56`, `0x5d57`. Peripheral ASL files under `sm8750-oneplus13-*` are therefore aligned to the OPlus `dodge` branch.
 
-All OnePlus 13 ASL snippets have been syntax-validated by wrapping each file in an SSDT `DefinitionBlock` and compiling with `iasl -tc`; current result is `0 Errors, 0 Warnings, 0 Remarks` for buttons, USB, touchscreen, thermal, battery and display/cover snippets.
+All OnePlus 13 ASL snippets have been syntax-validated by wrapping each file in an SSDT `DefinitionBlock` and compiling with `iasl -tc`; current result is `0 Errors, 0 Warnings` for buttons, USB, touchscreen, thermal, battery, display/cover, MDSS display, Wi-Fi and simple-framebuffer snippets.
+
+### Commercial OnePlus 13 confirmations
+
+- Touchscreen is Synaptics S3910 / SPI-HBP on the real parent bus path `/soc/qupv3_1_geni_se@ac0000/spi@a90000`; physical pins are IRQ `GPIO162`, Reset `GPIO161`, AVDD enable `PM8550VS-J GPIO3`, SPI CS `0`, 19 MHz, mode 0.
+- Wi-Fi/BT is described as WCN7850 behind PCIe0; the WLAN enable GPIO has been replaced with the confirmed commercial OnePlus 13 value `GPIO16` (`0x10`) instead of the earlier placeholder.
 
 ## Source paths
 

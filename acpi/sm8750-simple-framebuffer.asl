@@ -3,7 +3,7 @@
  * Source DTS:
  *   vendor/qcom/opensource/display-devicetree/display/sun-sde-display.dtsi
  *     &reserved_memory/splash_memory: reg = <0x0 0xfc800000 0x0 0x02b00000>
- *   vendor/qcom/opensource/display-devicetree/oplus/panel/*
+ *   vendor/qcom/opensource/display-devicetree/oplus/panel directory
  *     OnePlus/OPlus panels: 1440x3168
  *
  * Framebuffer layout used here:
@@ -32,19 +32,15 @@ Scope (\_SB)
         Name (FBS,  5760)                // stride: 1440 * 4 bytes
         Name (FBSZ, 0x01167000)          // visible framebuffer byte size
 
-        Method (_CRS, 0, NotSerialized)
+        Name (_CRS, ResourceTemplate ()
         {
-            Name (RBUF, ResourceTemplate ()
-            {
-                // Expose only the active framebuffer bytes. The backing
-                // reserved-memory window from DTS is 0x02B00000 at the same base.
-                Memory32Fixed (ReadWrite,
-                    0xFC800000,         // BaseAddress
-                    0x01167000          // RangeLength = 1440 * 3168 * 4
-                )
-            })
-            Return (RBUF)
-        }
+            // Expose only the active framebuffer bytes. The backing
+            // reserved-memory window from DTS is 0x02B00000 at the same base.
+            Memory32Fixed (ReadWrite,
+                0xFC800000,         // BaseAddress
+                0x01167000          // RangeLength = 1440 * 3168 * 4
+            )
+        })
 
         Name (_DSD, Package ()
         {

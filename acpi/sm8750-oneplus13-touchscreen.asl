@@ -9,8 +9,10 @@
  *     reset GPIO161 (TLMM, active-low, 0x1)
  *     AVDD enable: pm8550vs_j_gpios GPIO3
  *     VDD supply: regulator L4B
- *   sun-qupv3.dtsi:
- *     qupv3_se4_spi @ 0x00A90000, GIC SPI 357 -> GSIV 389
+ *   sun-qupv3.dtsi / real commercial OnePlus 13 bus path:
+ *     /soc/qupv3_1_geni_se@ac0000/spi@a90000
+ *     qupv3_se4_spi @ 0x00A90000, parent QUPv3 wrapper @ 0x00AC0000
+ *     GIC SPI 357 -> GSIV 389
  *     pins: MISO=GPIO48, MOSI=GPIO49, CLK=GPIO50, CS=GPIO51
  *
  * Windows driver:
@@ -28,6 +30,8 @@ Scope (\_SB)
 {
     /*
      * QUPv3 SE4 SPI controller.
+     * Real DT path: /soc/qupv3_1_geni_se@ac0000/spi@a90000
+     * Parent wrapper: qupv3_1_geni_se @ 0x00AC0000
      * Registers: 0x00A90000 / 0x4000  (sun-qupv3.dtsi)
      * IRQ: GIC SPI 357 -> GSIV 389
      */
@@ -48,8 +52,11 @@ Scope (\_SB)
         {
             ToUUID ("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
             Package () {
-                Package () { "compatible",        "qcom,geni-spi" },
-                Package () { "spi-max-frequency", 50000000 },
+                Package () { "compatible",             "qcom,geni-spi" },
+                Package () { "qcom,dt-path",           "/soc/qupv3_1_geni_se@ac0000/spi@a90000" },
+                Package () { "qcom,dt-parent",         "/soc/qupv3_1_geni_se@ac0000" },
+                Package () { "qcom,qupv3-parent-base", 0x00AC0000 },
+                Package () { "spi-max-frequency",      50000000 },
             }
         })
 
@@ -61,8 +68,8 @@ Scope (\_SB)
          *
          * _CRS resource order (device.c reads them in index order):
          *   [0] SPISerialBusV2   SPI connection  (CM_RESOURCE_CONNECTION_TYPE_SERIAL_SPI)
-         *   [1] GpioInt          IRQ GPIO162     (CM_RESOURCE_CONNECTION_CLASS_GPIO)
-         *   [2] GpioIo           Reset GPIO161
+         *   [1] GpioInt          IRQ GPIO162     (confirmed physical TLMM pin)
+         *   [2] GpioIo           Reset GPIO161   (confirmed physical TLMM pin)
          *   [3] GpioIo           AVDD-en PMJ0 GPIO3
          */
         Device (TCH0)
@@ -117,6 +124,9 @@ Scope (\_SB)
                     Package () { "synaptics,power-on-delay-ms", 200 },
                     Package () { "synaptics,spi-mode",         0 },
                     Package () { "synaptics,spi-max-frequency", 19000000 },
+                    Package () { "synaptics,irq-gpio",         162 },
+                    Package () { "synaptics,reset-gpio",       161 },
+                    Package () { "qcom,dt-parent-bus",         "/soc/qupv3_1_geni_se@ac0000/spi@a90000" },
                 }
             })
 
