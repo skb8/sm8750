@@ -1,113 +1,135 @@
 /*
- * SM8750 / OnePlus 13 (OPlus dodge T0) Synaptics S3910 touchscreen ASL skeleton.
+ * SM8750 / OnePlus 13 ACPI SSDT -- Synaptics S3910 touchscreen (SPI-HBP).
  *
- * Values below were verified against the user-provided official dtbo.img overlays:
- *   model = "Qualcomm Technologies, Inc. Sun MTP,dodge T0"
- *   oplus,project-id = 0x5d0d / 23821 and variants 0x5d55..0x5d57
- *   synaptics_tcm_hbp@0 status = "okay"
+ * Sources:
+ *   dtbo.img overlay_04 (dodge T0, project 0x5d0d):
+ *     synaptics_tcm_hbp@0, compatible "synaptics,tcm-spi-hbp"
+ *     chip-name "S3910", firmware "AA545", spi-max-frequency 19 MHz
+ *     IRQ GPIO162 (TLMM, edge-falling, 0x2008)
+ *     reset GPIO161 (TLMM, active-low, 0x1)
+ *     AVDD enable: pm8550vs_j_gpios GPIO3
+ *     VDD supply: regulator L4B
+ *   sun-qupv3.dtsi:
+ *     qupv3_se4_spi @ 0x00A90000, GIC SPI 357 -> GSIV 389
+ *     pins: MISO=GPIO48, MOSI=GPIO49, CLK=GPIO50, CS=GPIO51
  *
- * DTBO touchscreen facts:
- *   compatible = "synaptics,tcm-spi-hbp"
- *   chip-name = "S3910", firmware_name = "AA545"
- *   spi-max-frequency = 19 MHz, spi-mode = 0, reg/chip-select = 0
- *   IRQ = TLMM GPIO162, flags 0x2008
- *   reset = TLMM GPIO161, flags 0x1
- *   AVDD enable = pm8550vs_j GPIO3, VDD supply name = "vdd"
- *   HBP panel-coords = <0x5a00 0xc600> = 23040 x 50688
- *   display-coords from non-HBP sibling = 1440 x 3168
- *   tx-rx default = 17 x 38; S3910_PANEL7 override = 18 x 40
+ * Windows driver:
+ *   _HID "SYNA3910" matched by drivers/touchscreen/SynapticsTouch_S3910.inf
+ *   Bus: SPI (SPISerialBusV2 resource, SpbCx framework)
+ *   Transport: drivers/touchscreen/spb_spi.c (TCM-over-SPI framing)
  *
- * IMPORTANT:
- *   \_SB.GIO0 and \_SB.PMJ0 are symbolic placeholders for TLMM and PM8550VS-J
- *   GPIO controllers. Rename them to the real ACPI GPIO controller paths used in
- *   your platform namespace. Windows also needs a Synaptics S3910/SPI-HBP ACPI
- *   driver; this SSDT only describes resources and DT-compatible properties.
+ * GIC SPI N -> ACPI GSIV N+32.
  */
 
-External (\_SB.GIO0, DeviceObj)  // TLMM GPIO controller placeholder
-External (\_SB.PMJ0, DeviceObj)  // PM8550VS-J GPIO controller placeholder
+External (\_SB.GIO0, DeviceObj)   // TLMM GPIO controller
+External (\_SB.PMJ0, DeviceObj)   // PM8550VS-J GPIO controller (AVDD GPIO3)
 
 Scope (\_SB)
 {
+    /*
+     * QUPv3 SE4 SPI controller.
+     * Registers: 0x00A90000 / 0x4000  (sun-qupv3.dtsi)
+     * IRQ: GIC SPI 357 -> GSIV 389
+     */
     Device (SPI4)
     {
-        Name (_HID, "PRP0001")
+        Name (_HID, "QCOM0400")
         Name (_UID, 4)
         Name (_CCA, One)
         Name (_STA, 0x0F)
 
-        Name (_DSD, Package () {
+        Name (_CRS, ResourceTemplate ()
+        {
+            Memory32Fixed (ReadWrite, 0x00A90000, 0x00004000)
+            Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive) { 389 }
+        })
+
+        Name (_DSD, Package ()
+        {
             ToUUID ("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
             Package () {
-                Package () { "compatible", "qcom,spi-geni" },
-                Package () { "reg-names", "se_phys" },
-                Package () { "spi-max-frequency", 50000000 }
+                Package () { "compatible",        "qcom,geni-spi" },
+                Package () { "spi-max-frequency", 50000000 },
             }
         })
 
-        Method (_CRS, 0, NotSerialized)
-        {
-            Return (ResourceTemplate () {
-                Memory32Fixed (ReadWrite, 0x00A90000, 0x00004000)
-                // qupv3_se4_spi DT GIC_SPI 357 => ACPI GSIV 389.
-                Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, ,, ) { 389 }
-            })
-        }
-
+        /*
+         * Synaptics S3910 touchscreen.
+         *
+         * _HID "SYNA3910" matched by SynapticsTouch_S3910.inf.
+         * _CID "PNP0C50" triggers HID class enumeration.
+         *
+         * _CRS resource order (device.c reads them in index order):
+         *   [0] SPISerialBusV2   SPI connection  (CM_RESOURCE_CONNECTION_TYPE_SERIAL_SPI)
+         *   [1] GpioInt          IRQ GPIO162     (CM_RESOURCE_CONNECTION_CLASS_GPIO)
+         *   [2] GpioIo           Reset GPIO161
+         *   [3] GpioIo           AVDD-en PMJ0 GPIO3
+         */
         Device (TCH0)
         {
-            Name (_HID, "PRP0001")
-            Name (_UID, 0)
+            Name (_HID, "SYNA3910")
+            Name (_CID, "PNP0C50")
+            Name (_UID, Zero)
             Name (_STA, 0x0F)
 
-            Name (_DSD, Package () {
+            Name (_CRS, ResourceTemplate ()
+            {
+                SPISerialBusV2 (
+                    0x0000,                 // CS 0
+                    PolarityLow,
+                    FourWireMode,
+                    0x08,
+                    ControllerInitiated,
+                    19000000,               // 19 MHz
+                    ClockPolarityLow,       // CPOL=0
+                    ClockPhaseFirst,        // CPHA=0
+                    "\\_SB.SPI4",
+                    0x00,
+                    ResourceConsumer,,
+                )
+
+                // IRQ: TLMM GPIO162, edge-falling, wake-capable
+                GpioInt (Edge, ActiveLow, ExclusiveAndWake, PullUp, 0,
+                         "\\_SB.GIO0", 0, ResourceConsumer,,) { 162 }
+
+                // Reset: TLMM GPIO161, active-low
+                GpioIo (Exclusive, PullNone, 0, 0, IoRestrictionOutputOnly,
+                        "\\_SB.GIO0", 0, ResourceConsumer,,) { 161 }
+
+                // AVDD enable: PM8550VS-J GPIO3
+                GpioIo (Exclusive, PullDown, 0, 0, IoRestrictionOutputOnly,
+                        "\\_SB.PMJ0", 0, ResourceConsumer,,) { 3 }
+            })
+
+            Name (_DSD, Package ()
+            {
                 ToUUID ("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
-                Package () {
-                    Package () { "compatible", Package () { "synaptics,tcm-spi-hbp" } },
-                    Package () { "chip-name", "S3910" },
-                    Package () { "firmware-name", "AA545" },
-                    Package () { "reg", 0 },
-                    Package () { "spi-max-frequency", 19000000 },
-                    Package () { "synaptics,vdd-name", "vdd" },
-                    Package () { "touchpanel,panel-coords", Package () { 23040, 50688 } },
-                    Package () { "touchpanel,display-coords", Package () { 1440, 3168 } },
-                    Package () { "touchpanel,tx-rx-num", Package () { 17, 38 } },
-                    Package () { "synaptics,s3910-panel7-tx-rx-num", Package () { 18, 40 } },
-                    Package () { "panel_type", Package () { 10, 3, 3, 3 } },
-                    Package () { "platform_support_project", Package () { 0x5D0D, 0x5D55, 0x5D56, 0x5D57 } },
-                    Package () { "synaptics,power-on-state", 1 },
-                    Package () { "synaptics,power-delay-ms", 200 },
-                    Package () { "synaptics,irq-on-state", 0 },
-                    Package () { "synaptics,reset-on-state", 0 },
-                    Package () { "synaptics,reset-active-ms", 10 },
-                    Package () { "synaptics,reset-delay-ms", 80 },
-                    Package () { "synaptics,spi-mode", 0 },
-                    Package () { "synaptics,spi-byte-delay-us", 0 },
-                    Package () { "synaptics,spi-block-delay-us", 0 },
-                    Package () { "qcom,rt", 1 }
+                Package ()
+                {
+                    Package () { "touchscreen-size-x",         1440 },
+                    Package () { "touchscreen-size-y",         3168 },
+                    Package () { "touchscreen-max-pressure",   255 },
+                    Package () { "synaptics,chip-name",        "S3910" },
+                    Package () { "synaptics,firmware-name",    "AA545" },
+                    Package () { "synaptics,tx-count",         17 },
+                    Package () { "synaptics,rx-count",         38 },
+                    Package () { "synaptics,reset-delay-ms",   80 },
+                    Package () { "synaptics,power-on-delay-ms", 200 },
+                    Package () { "synaptics,spi-mode",         0 },
+                    Package () { "synaptics,spi-max-frequency", 19000000 },
                 }
             })
 
-            Method (_CRS, 0, NotSerialized)
+            // _DSM: HID descriptor address (required for PNP0C50)
+            Method (_DSM, 4, NotSerialized)
             {
-                Return (ResourceTemplate () {
-                    SPISerialBusV2 (0x0000, PolarityLow, FourWireMode, 0x08,
-                        ControllerInitiated, 19000000, ClockPolarityLow,
-                        ClockPhaseFirst, "\\_SB.SPI4", 0x00,
-                        ResourceConsumer, , )
-
-                    // Touch IRQ: TLMM GPIO162, DT flags 0x2008.
-                    GpioInt (Edge, ActiveLow, ExclusiveAndWake, PullUp, 0,
-                        "\\_SB.GIO0", 0, ResourceConsumer, , ) { 162 }
-
-                    // Reset GPIO: TLMM GPIO161.
-                    GpioIo (Exclusive, PullNone, 0, 0, IoRestrictionOutputOnly,
-                        "\\_SB.GIO0", 0, ResourceConsumer, , ) { 161 }
-
-                    // AVDD enable GPIO: pm8550vs_j_gpios GPIO3.
-                    GpioIo (Exclusive, PullNone, 0, 0, IoRestrictionOutputOnly,
-                        "\\_SB.PMJ0", 0, ResourceConsumer, , ) { 3 }
-                })
+                If (LEqual (Arg0,
+                    ToUUID ("3cdff6f7-4267-4555-ad05-b30a3d8938de")))
+                {
+                    If (LEqual (Arg2, Zero)) { Return (Buffer () { 0x03 }) }
+                    If (LEqual (Arg2, One))  { Return (One) }
+                }
+                Return (Buffer () { 0x00 })
             }
         }
     }
