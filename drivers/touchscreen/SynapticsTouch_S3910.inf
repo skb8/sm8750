@@ -4,22 +4,23 @@
 ; OnePlus 13 / SM8750 adaptation of edk2-porting/SynapticsTouch_TCM
 ;
 ; Hardware: Synaptics S3910 connected via QUPv3 SE4 SPI @ 19 MHz
-; ACPI _HID: SYNA3910  (defined in acpi/sm8750-oneplus13-touchscreen.asl)
+; ACPI _HID: SYNA3910 (defined in acpi/sm8750-oneplus13-touchscreen.asl)
 ;
 ; Changes from original SynapticsTouch_TCM:
-;   - Bus transport: I2C -> SPI (spb_spi.c replaces spb.c)
-;   - Hardware ID updated to ACPI\SYNA3910
-;   - device.c: CM_RESOURCE_CONNECTION_TYPE_SERIAL_I2C -> _SERIAL_SPI
+; - Bus transport: I2C -> SPI (spb_spi.c replaces spb.c)
+; - Hardware ID updated to ACPI\SYNA3910
+; - device.c: CM_RESOURCE_CONNECTION_TYPE_SERIAL_I2C -> _SERIAL_SPI
+; - device.c: pass ResourcesTranslated to SpbTargetInitializeWithResources()
 ;
 
 [Version]
-Signature    = "$WINDOWS NT$"
-Class        = HIDClass
-ClassGuid    = {745A17A0-74D3-11D0-B6FE-00A0C90F57DA}
-Provider     = %Provider_Name%
-DriverVer    = 01/01/2024,1.0.0.1
-CatalogFile  = SynapticsTouch_S3910.cat
-PnpLockdown  = 1
+Signature = "$WINDOWS NT$"
+Class = HIDClass
+ClassGuid = {745A17A0-74D3-11D0-B6FE-00A0C90F57DA}
+Provider = %Provider_Name%
+DriverVer = 01/01/2024,1.0.0.1
+CatalogFile = SynapticsTouch_S3910.cat
+PnpLockdown = 1
 
 [DestinationDirs]
 DefaultDestDir = 13
@@ -47,39 +48,39 @@ AddReg = FilterInst.NT.HW.AddReg
 AddReg = TchDriver_Device.NT.HW.AddReg.S3910
 
 [FilterInst.NT.HW.AddReg]
-HKR,,"UpperFilters",    %REG_MULTI_SZ%, mshidkmdf
-HKR,,"MultiportDevice", %REG_DWORD%,    0
+HKR,,"UpperFilters", %REG_MULTI_SZ%, mshidkmdf
+HKR,,"MultiportDevice", %REG_DWORD%, 0
 
 [TchDriver_Device.NT.HW.AddReg.S3910]
-HKR,,"BusType",          %REG_DWORD%, 1
-HKR,,"SpiMaxFrequency",  %REG_DWORD%, 19000000
-HKR,,"SpiMode",          %REG_DWORD%, 0
+HKR,,"BusType", %REG_DWORD%, 1
+HKR,,"SpiMaxFrequency", %REG_DWORD%, 19000000
+HKR,,"SpiMode", %REG_DWORD%, 0
 HKR,,"TouchscreenWidth", %REG_DWORD%, 1440
 HKR,,"TouchscreenHeight",%REG_DWORD%, 3168
-HKR,,"ResetDelayMs",     %REG_DWORD%, 80
-HKR,,"PowerOnDelayMs",   %REG_DWORD%, 200
+HKR,,"ResetDelayMs", %REG_DWORD%, 80
+HKR,,"PowerOnDelayMs", %REG_DWORD%, 200
 
 [TchDriver_Device.NT.Services]
 AddService = SynapticsTouch, %SPSVCINST_ASSOCSERVICE%, TchDriver_Service_Inst
 
 [TchDriver_Service_Inst]
-DisplayName    = %TchDriver_Service_Desc%
-ServiceType    = %SERVICE_KERNEL_DRIVER%
-StartType      = %SERVICE_DEMAND_START%
-ErrorControl   = %SERVICE_ERROR_NORMAL%
-ServiceBinary  = %13%\SynapticsTouch.sys
+DisplayName = %TchDriver_Service_Desc%
+ServiceType = %SERVICE_KERNEL_DRIVER%
+StartType = %SERVICE_DEMAND_START%
+ErrorControl = %SERVICE_ERROR_NORMAL%
+ServiceBinary = %13%\SynapticsTouch.sys
 LoadOrderGroup = Base
 
 [Strings]
-Provider_Name          = "skb8/sm8750 WoA project"
-Manufacturer_Name      = "Synaptics"
-Installation_Disk      = "Synaptics S3910 SPI Touchscreen Driver Disk"
-TchDriver_Device_Desc  = "Synaptics S3910 Touchscreen (SPI-HBP)"
+Provider_Name = "skb8/sm8750 WoA project"
+Manufacturer_Name = "Synaptics"
+Installation_Disk = "Synaptics S3910 SPI Touchscreen Driver Disk"
+TchDriver_Device_Desc = "Synaptics S3910 Touchscreen (SPI-HBP)"
 TchDriver_Service_Desc = "Synaptics S3910 SPI Touchscreen Driver"
 
 SPSVCINST_ASSOCSERVICE = 0x00000002
-SERVICE_KERNEL_DRIVER  = 1
-SERVICE_DEMAND_START   = 3
-SERVICE_ERROR_NORMAL   = 1
-REG_MULTI_SZ           = 0x00010000
-REG_DWORD              = 0x00010001
+SERVICE_KERNEL_DRIVER = 1
+SERVICE_DEMAND_START = 3
+SERVICE_ERROR_NORMAL = 1
+REG_MULTI_SZ = 0x00010000
+REG_DWORD = 0x00010001

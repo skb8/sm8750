@@ -7,7 +7,7 @@
  *
  * TCM SPI-HBP framing (Synaptics TCM spec):
  *   Write: [0xA5, CMD, LEN_H, LEN_L, PAYLOAD...]
- *   Read:  [STATUS, LEN_H, LEN_L, PAYLOAD...]   <- host clocks out 0xFF padding
+ *   Read:  [STATUS, LEN_H, LEN_L, PAYLOAD...] <- host clocks out 0xFF padding
  *   Continued read (interrupt-driven): [0xA5, 0x03, LEN_H, LEN_L, PAYLOAD..., 0x5A]
  *
  * The context struct is API-compatible with the I2C SPB_CONTEXT so the rest
@@ -19,7 +19,7 @@
 #include <wdm.h>
 #include <wdf.h>
 
-#define DEFAULT_SPB_BUFFER_SIZE     256
+#define DEFAULT_SPB_BUFFER_SIZE      256
 
 // TCM SPI packet framing constants (from touch_tcm.h)
 #define TCM_SPI_MARKER              0xA5
@@ -44,9 +44,22 @@ typedef struct _SPB_CONTEXT
 } SPB_CONTEXT;
 
 NTSTATUS
+SpbTargetConfigureFromResources(
+    IN SPB_CONTEXT *SpbContext,
+    IN WDFCMRESLIST ResourcesTranslated
+    );
+
+NTSTATUS
 SpbTargetInitialize(
     IN WDFDEVICE   FxDevice,
     IN SPB_CONTEXT *SpbContext
+    );
+
+NTSTATUS
+SpbTargetInitializeWithResources(
+    IN WDFDEVICE   FxDevice,
+    IN SPB_CONTEXT *SpbContext,
+    IN WDFCMRESLIST ResourcesTranslated
     );
 
 VOID
@@ -58,22 +71,22 @@ SpbTargetDeinitialize(
 NTSTATUS
 SpbWriteDataSynchronously(
     IN SPB_CONTEXT *SpbContext,
-    IN UCHAR        Command,
-    IN PVOID        Data,
-    IN ULONG        Length
+    IN UCHAR       Command,
+    IN PVOID       Data,
+    IN ULONG       Length
     );
 
 NTSTATUS
 SpbReadDataSynchronously(
     IN  SPB_CONTEXT *SpbContext,
-    IN  UCHAR        Command,
-    OUT PVOID        Data,
-    IN  ULONG        Length
+    IN  UCHAR       Command,
+    OUT PVOID       Data,
+    IN  ULONG       Length
     );
 
 NTSTATUS
 SpbReadContinuedData(
     IN  SPB_CONTEXT *SpbContext,
-    OUT PVOID        Data,
-    IN  ULONG        Length
+    OUT PVOID       Data,
+    IN  ULONG       Length
     );
